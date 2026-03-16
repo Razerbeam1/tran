@@ -1,5 +1,5 @@
 // ===================================================
-// LINE Bot แปลภาษา พม่า ↔ ไทย ↔ อังกฤษ
+// LINE Bot แปลภาษา พม่า ↔ ไทย ↔ อังกฤษ ↔ เกาหลี
 // Host ฟรีบน Render.com
 // ===================================================
 
@@ -44,25 +44,29 @@ function detectLanguage(text) {
   const myanmarRegex = /[\u1000-\u109F]/;
   // Thai Unicode range: U+0E00 - U+0E7F
   const thaiRegex = /[\u0E00-\u0E7F]/;
+  // Korean (Hangul) Unicode ranges: U+AC00-U+D7AF (syllables), U+1100-U+11FF (Jamo), U+3130-U+318F (compat Jamo)
+  const koreanRegex = /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/;
 
   if (myanmarRegex.test(text)) return "my";   // Myanmar/Burmese
   if (thaiRegex.test(text)) return "th";       // Thai
+  if (koreanRegex.test(text)) return "ko";     // Korean
   return "en";                                  // Default = English
 }
 
 // ─── ชื่อภาษาสำหรับแสดงผล ──────────────────────────
 const langNames = {
-  my: { th: "พม่า", en: "Burmese", my: "ဗမာ" },
-  th: { th: "ไทย", en: "Thai", my: "ထိုင်း" },
-  en: { th: "อังกฤษ", en: "English", my: "အင်္ဂလိပ်" },
+  my: { th: "พม่า", en: "Burmese", my: "ဗမာ", ko: "미얀마어" },
+  th: { th: "ไทย", en: "Thai", my: "ထိုင်း", ko: "태국어" },
+  en: { th: "อังกฤษ", en: "English", my: "အင်္ဂလိပ်", ko: "영어" },
+  ko: { th: "เกาหลี", en: "Korean", my: "ကိုရီးယား", ko: "한국어" },
 };
 
 // ─── แปลภาษา ───────────────────────────────────────
 async function translateText(text, fromLang) {
   const results = [];
 
-  // กำหนดภาษาเป้าหมาย (แปลไปอีก 2 ภาษา)
-  const targets = ["my", "th", "en"].filter((l) => l !== fromLang);
+  // กำหนดภาษาเป้าหมาย (แปลไปอีก 3 ภาษา)
+  const targets = ["my", "th", "en", "ko"].filter((l) => l !== fromLang);
 
   for (const targetLang of targets) {
     try {
@@ -91,7 +95,11 @@ function buildReplyMessage(fromLang, translations) {
   const lines = [];
 
   for (const t of translations) {
-    const flag = t.lang === "my" ? "🇲🇲" : t.lang === "th" ? "🇹🇭" : "🇬🇧";
+    const flag =
+      t.lang === "my" ? "🇲🇲" :
+      t.lang === "th" ? "🇹🇭" :
+      t.lang === "ko" ? "🇰🇷" :
+      "🇬🇧";
     lines.push(`${flag} : ${t.text}`);
   }
 
@@ -118,13 +126,15 @@ async function handleEvent(event) {
             "📖 วิธีใช้ Bot แปลภาษา\n" +
             "━━━━━━━━━━━━━━━\n\n" +
             "พิมพ์ข้อความภาษาอะไรก็ได้:\n\n" +
-            "🇲🇲 พม่า → แปลเป็นไทย + อังกฤษ\n" +
-            "🇹🇭 ไทย → แปลเป็นพม่า + อังกฤษ\n" +
-            "🇬🇧 อังกฤษ → แปลเป็นพม่า + ไทย\n\n" +
+            "🇲🇲 พม่า → แปลเป็นไทย + อังกฤษ + เกาหลี\n" +
+            "🇹🇭 ไทย → แปลเป็นพม่า + อังกฤษ + เกาหลี\n" +
+            "🇬🇧 อังกฤษ → แปลเป็นพม่า + ไทย + เกาหลี\n" +
+            "🇰🇷 เกาหลี → แปลเป็นพม่า + ไทย + อังกฤษ\n\n" +
             "ตัวอย่าง:\n" +
             '• พิมพ์ "สวัสดีครับ"\n' +
             '• พิมพ์ "Hello"\n' +
-            '• พิมพ์ "မင်္ဂလာပါ"\n\n' +
+            '• พิมพ์ "မင်္ဂလာပါ"\n' +
+            '• พิมพ์ "안녕하세요"\n\n' +
             "Bot จะแปลให้อัตโนมัติ! 🚀",
         },
       ],
