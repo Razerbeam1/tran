@@ -88,23 +88,14 @@ async function translateText(text, fromLang) {
 
 // ─── สร้างข้อความตอบกลับ ───────────────────────────
 function buildReplyMessage(fromLang, translations) {
-  const fromName = langNames[fromLang];
-  
-  let reply = `🌐 ตรวจพบภาษา: ${fromName.th} (${fromName.en})\n`;
-  reply += `━━━━━━━━━━━━━━━\n`;
+  const lines = [];
 
   for (const t of translations) {
-    const targetName = langNames[t.lang];
     const flag = t.lang === "my" ? "🇲🇲" : t.lang === "th" ? "🇹🇭" : "🇬🇧";
-    reply += `\n${flag} ${targetName.th} (${targetName.en}):\n`;
-    reply += `${t.text}\n`;
+    lines.push(`${flag} : ${t.text}`);
   }
 
-  reply += `\n━━━━━━━━━━━━━━━`;
-  reply += `\n💡 พิมพ์ข้อความภาษาอะไรก็ได้`;
-  reply += `\n   (พม่า / ไทย / อังกฤษ)`;
-
-  return reply;
+  return lines.join("\n");
 }
 
 // ─── จัดการ Event ──────────────────────────────────
